@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "sysinfo.h"
 
 uint64
 sys_exit(void)
@@ -77,7 +78,6 @@ uint64
 sys_kill(void)
 {
   int pid;
-
   if(argint(0, &pid) < 0)
     return -1;
   return kill(pid);
@@ -94,4 +94,30 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+uint64
+sys_trace(void)
+{
+  int call_select;
+  if(argint(0, &call_select) < 0)
+    return -1;
+  myproc()->call_select = call_select;
+  return 0;
+}
+
+uint64
+sys_sysinfo(void)
+{
+  uint64 st; // user pointer to struct stat
+
+  if(argaddr(0, &st) < 0)
+    return -1;
+  struct sysinfo ans;
+  ans.freemem = getfreemem();
+  ans.nproc = getfreeproc();
+  if(copyout(myproc()->pagetable,st,(char*)&ans,sizeof ans)){
+    return -1;
+  }
+  return 0;
 }

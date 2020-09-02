@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "sysinfo.h"
 
 struct cpu cpus[NCPU];
 
@@ -294,7 +295,7 @@ fork(void)
   pid = np->pid;
 
   np->state = RUNNABLE;
-
+  np->call_select = p->call_select;
   release(&np->lock);
 
   return pid;
@@ -685,4 +686,15 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+int getfreeproc(void){
+  int ans = 0;
+  struct proc *p;
+  for(p = proc; p < &proc[NPROC]; p++){
+    if(p->state == UNUSED)
+      continue;
+    ans++;
+  }
+  return ans;
 }

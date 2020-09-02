@@ -15,6 +15,9 @@ sinfo(struct sysinfo *info) {
 //
 // use sbrk() to count how many free physical memory pages there are.
 //
+
+
+
 int
 countfree()
 {
